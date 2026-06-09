@@ -74,11 +74,11 @@ const defaultHash = bcrypt.hashSync('password123', salt); // Preseeded password 
 
 // Seed initial mockup data so the platform is ready-to-test out of the box!
 state.users = [
-    { id: "USR-001", name: "Grand Taj Banquet Noida", email: "donor@zerohunger.org", password: defaultHash, role: "Donor", hasFssai: true, licenseId: "FSSAI-123456789" },
-    { id: "USR-002", name: "Feed The Children Foundation NGO", email: "ngo@zerohunger.org", password: defaultHash, role: "NGO", targetUnits: "Noida Sector 62" },
-    { id: "USR-003", name: "Ravi Kumar Logistics", email: "volunteer@zerohunger.org", password: defaultHash, role: "Volunteer", phone: "9876543210" },
-    { id: "USR-004", name: "Metro Commercial Kitchens", email: "vendor@zerohunger.org", password: defaultHash, role: "Vendor", discountOffers: [] },
-    { id: "USR-005", name: "System Administrator Core", email: "admin@zerohunger.org", password: defaultHash, role: "Admin" }
+    { id: "USR-001", name: "Grand Taj Banquet Noida", email: "donor@zerohunger.org", password: defaultHash, role: "Donor", hasFssai: true, licenseId: "FSSAI-123456789", securityQuestion: "What is your favorite coding topic?", securityAnswer: "mern" },
+    { id: "USR-002", name: "Feed The Children Foundation NGO", email: "ngo@zerohunger.org", password: defaultHash, role: "NGO", targetUnits: "Noida Sector 62", securityQuestion: "What is your favorite coding topic?", securityAnswer: "mern" },
+    { id: "USR-003", name: "Ravi Kumar Logistics", email: "volunteer@zerohunger.org", password: defaultHash, role: "Volunteer", phone: "9876543210", securityQuestion: "What is your favorite coding topic?", securityAnswer: "mern" },
+    { id: "USR-004", name: "Metro Commercial Kitchens", email: "vendor@zerohunger.org", password: defaultHash, role: "Vendor", discountOffers: [], securityQuestion: "What is your favorite coding topic?", securityAnswer: "mern" },
+    { id: "USR-005", name: "System Administrator Core", email: "admin@zerohunger.org", password: defaultHash, role: "Admin", securityQuestion: "What is your favorite coding topic?", securityAnswer: "mern" }
 ];
 
 // Helper to push system events into our audit logs
@@ -175,5 +175,16 @@ module.exports = {
     getLogs: () => state.logs,
     
     // CREATE: Manually write custom transaction events to the audit trail
-    logSystemEvent: (event) => logActivity(event)
+    logSystemEvent: (event) => logActivity(event),
+
+    // UPDATE: Reset user password by email
+    resetUserPassword: (email, newPassword) => {
+        const user = state.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+        if (user) {
+            user.password = bcrypt.hashSync(newPassword, salt);
+            logActivity(`Reset password for user: ${user.name} (${user.role})`);
+            return true;
+        }
+        return false;
+    }
 };

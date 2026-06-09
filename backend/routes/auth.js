@@ -39,9 +39,9 @@ router.post('/register', (req, res) => {
     const { name, email, password, role, ...extra } = req.body;
     
     // Step 1: Input Validation
-    if (!name || !email || !password || !role) {
+    if (!name || !email || !password || !role || !extra.securityQuestion || !extra.securityAnswer) {
         // Status Code 400 = Bad Request (Client did not supply required parameters)
-        return res.status(400).json({ success: false, message: "Please supply all required register fields." });
+        return res.status(400).json({ success: false, message: "Please supply all required register fields, including a security question and answer." });
     }
     
     // Step 2: Check for existing account to avoid duplicates
@@ -183,6 +183,65 @@ router.put('/profile', (req, res) => {
     } catch (err) {
         // Handles errors thrown by database (e.g. duplicate email addresses)
         return res.status(400).json({ success: false, message: err.message });
+    }
+});
+
+/**
+ * --------------------------------------------------------------------------
+ * ROUTE: POST /api/auth/forgot-password-step1
+ * --------------------------------------------------------------------------
+ * Receives email, checks if user exists, and returns the user's security question.
+ */
+router.post('/forgot-password-step1', (req, res) => {
+    const { email } = req.body;
+    
+    if (!email) {
+        return res.status(400).json({ success: false, message: "Please supply your registered email address." });
+    }
+    
+    const user = dbSim.getUserByEmail(email);
+    if (!user) {
+        return res.status(404).json({ success: false, message: "No account found with this email address." });
+    }
+    
+    return res.json({
+        success: true,
+        securityQuestion: user.securityQuestion || "What is your favorite coding topic?"
+    });
+});
+
+/**
+ * --------------------------------------------------------------------------
+ * ROUTE: POST /api/auth/forgot-password-step2
+ * --------------------------------------------------------------------------
+ * Verifies security answer and resets the user's password.
+ */
+router.post('/forgot-password-step2', (req, res) => {
+    const { email, securityAnswer, newPassword } = req.body;
+    
+    if (!email || !securityAnswer || !newPassword) {
+        return res.status(400).json({ success: false, message: "Please provide all required fields." });
+    }
+    
+    const user = dbSim.getUserByEmail(email);
+    if (!user) {
+        return res.status(404).json({ success: false, message: "No account found with this email address." });
+    }
+    
+    // Check security answer (case-insensitive and trimmed)
+    const userAnswer = securityAnswer.trim().toLowerCase();
+    const storedAnswer = (user.securityAnswer || "mern").trim().toLowerCase();
+    
+    if (userAnswer !== storedAnswer) {
+        return res.status(400).json({ success: false, message: "Incorrect security answer." });
+    }
+    
+    // Reset password
+    const success = dbSim.resetUserPassword(email, newPassword);
+    if (success) {
+        return res.json({ success: true, message: "Your password has been successfully reset. Please log in." });
+    } else {
+        return res.status(500).json({ success: false, message: "Failed to reset password." });
     }
 });
 
