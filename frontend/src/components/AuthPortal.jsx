@@ -16,7 +16,7 @@
 import React, { useState } from 'react';
 
 // Backend integration root URL
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = import.meta.env.VITE_API_BASE || (import.meta.env.DEV ? "http://localhost:5000/api" : "/api");
 
 // Standard pre-seeded sandbox credentials for students to test each dashboard instantly
 const PRESEEDED_ACCOUNTS = [

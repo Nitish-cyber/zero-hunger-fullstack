@@ -18,7 +18,7 @@
 import React, { useState } from 'react';
 
 // Root API URL for Express transactions integration
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = import.meta.env.VITE_API_BASE || (import.meta.env.DEV ? "http://localhost:5000/api" : "/api");
 
 function DonorDashboard({ user, donations, onDonationPosted }) {
   // Input fields state hooks (Controlled Component bindings)

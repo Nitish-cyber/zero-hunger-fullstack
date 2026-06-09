@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const authRouter = require('./routes/auth');
 const transactionRouter = require('./routes/transactions');
 const dbSim = require('./database_sim');
@@ -15,15 +16,27 @@ app.use(express.json());
 app.use('/api/auth', authRouter);
 app.use('/api/transactions', transactionRouter);
 
-// Fallback status page
-app.get('/', (req, res) => {
-    res.json({
-        success: true,
-        message: "Zero Hunger Platform Backend Server API operational.",
-        databaseUsers: dbSim.getUsers().length,
-        activeDonations: dbSim.getDonations().length
+// Serve static assets in production
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../frontend/dist')));
+    
+    app.get('*', (req, res, next) => {
+        if (req.path.startsWith('/api')) {
+            return next();
+        }
+        res.sendFile(path.resolve(__dirname, '../frontend', 'dist', 'index.html'));
     });
-});
+} else {
+    // Fallback status page
+    app.get('/', (req, res) => {
+        res.json({
+            success: true,
+            message: "Zero Hunger Platform Backend Server API operational.",
+            databaseUsers: dbSim.getUsers().length,
+            activeDonations: dbSim.getDonations().length
+        });
+    });
+}
 
 // Start listening
 app.listen(PORT, () => {

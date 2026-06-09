@@ -25,7 +25,7 @@ import VendorDashboard from './components/VendorDashboard';
 import AdminDashboard from './components/AdminDashboard';
 
 // Define the root API endpoint for backend service integration
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = import.meta.env.VITE_API_BASE || (import.meta.env.DEV ? "http://localhost:5000/api" : "/api");
 
 function App() {
   /**
