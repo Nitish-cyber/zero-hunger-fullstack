@@ -23,6 +23,7 @@ import NgoDashboard from './components/NgoDashboard';
 import VolunteerDashboard from './components/VolunteerDashboard';
 import VendorDashboard from './components/VendorDashboard';
 import AdminDashboard from './components/AdminDashboard';
+import LandingPage from './components/LandingPage';
 
 // Define the root API endpoint for backend service integration
 const API_BASE = import.meta.env.VITE_API_BASE || (import.meta.env.DEV ? "http://localhost:5000/api" : "/api");
@@ -49,6 +50,7 @@ function App() {
   // Advanced Navigation & Portal Overlay States
   const [currentView, setCurrentView] = useState('');
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showAuthPortal, setShowAuthPortal] = useState(false);
 
   // Actor Profile Form Editor States (Controlled input variables)
   const [profileName, setProfileName] = useState('');
@@ -266,12 +268,39 @@ function App() {
     }
   };
 
-  // If user session does not exist, display authorization portal
+  // If user session does not exist, display landing page or authorization portal
   if (!token || !user) {
+    if (showAuthPortal) {
+      return (
+        <div className="auth-bg">
+          <AuthPortal 
+            onAuthSuccess={handleLogin} 
+            onBack={() => setShowAuthPortal(false)} 
+          />
+        </div>
+      );
+    }
     return (
-      <div className="auth-bg">
-        <AuthPortal onAuthSuccess={handleLogin} />
-      </div>
+      <>
+        {/* Simple top navbar for the landing page with access portal shortcut */}
+        <header className="landing-navbar">
+          <div className="brand-section">
+            <div className="brand-logo">ØH</div>
+            <div>
+              <h1 className="brand-title" style={{ lineHeight: 1.1 }}>Zero Hunger</h1>
+              <span style={{ fontSize: '10px', color: 'var(--primary)', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                Redistribution Hub
+              </span>
+            </div>
+          </div>
+          <button className="btn btn-outline" onClick={() => setShowAuthPortal(true)}>
+            Portal Sign In
+          </button>
+        </header>
+        <main className="main-wrapper" style={{ paddingTop: '20px' }}>
+          <LandingPage onGetStarted={() => setShowAuthPortal(true)} />
+        </main>
+      </>
     );
   }
 

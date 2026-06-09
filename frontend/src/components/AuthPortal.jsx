@@ -27,7 +27,7 @@ const PRESEEDED_ACCOUNTS = [
   { role: "Admin", email: "admin@zerohunger.org", label: "Admin Core Audit", desc: "Monitor platform metrics", icon: "⚙️" }
 ];
 
-function AuthPortal({ onAuthSuccess }) {
+function AuthPortal({ onAuthSuccess, onBack }) {
   // Toggle states
   const [isLogin, setIsLogin] = useState(true);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
@@ -221,6 +221,28 @@ function AuthPortal({ onAuthSuccess }) {
 
   return (
     <div className="auth-card" style={{ maxWidth: '680px', width: '100%', border: '1px solid var(--border-color)', transition: 'var(--transition)' }}>
+      {onBack && (
+        <button 
+          onClick={onBack}
+          style={{
+            border: 'none',
+            background: 'none',
+            color: 'var(--primary)',
+            fontSize: '14px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            marginBottom: '20px',
+            padding: '4px 0',
+            transition: 'var(--transition)'
+          }}
+          className="back-btn"
+        >
+          ← Back to Homepage
+        </button>
+      )}
       <div className="auth-header">
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
           <div className="brand-logo" style={{ width: '54px', height: '54px', fontSize: '26px' }}>ØH</div>
